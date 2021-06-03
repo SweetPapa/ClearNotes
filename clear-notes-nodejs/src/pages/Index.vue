@@ -10,15 +10,23 @@
   >
     <div class="" :style="{ '-webkit-app-region': sWindowDragSetting }">
       <!-- Menu Bar -- Which is Draggable -->
-      <q-bar dark>
+      <q-bar class="appMenuBar" dark>
         <q-btn dense flat round icon="lens" size="8.5px" color="red" @click="changeWindow('close')" />
         <q-btn dense flat round icon="lens" size="8.5px" color="yellow" @click="changeWindow('min')" />
         <q-btn dense flat round icon="lens" size="8.5px" color="green" @click="changeWindow('max')"/>
-        <div class="col text-center text-weight-bold q-pr-xl titleText">
-          {{ noteTitle }}
+        <div class="col text-center  q-pr-xl titleText">
+          Clear Notes | <b>{{ noteTitle }}</b>
         </div>
         <q-btn dense flat rount icon="settings" @click="openSettingsPane()"/>
       </q-bar>
+
+      <q-expansion-item
+        switch-toggle-side
+        expand-separator
+        v-model="bShowExapandedMenus"
+        :label="sToolBarTitle"
+        class="toolBarColor"
+      >
 
       <!-- Title Input Field -->
       <q-input
@@ -31,11 +39,86 @@
         :style="{ '-webkit-app-region': 'no-drag' }"
       />
 
+      </q-expansion-item>
+
       <!-- Text Editor -->
       <q-editor
+        v-if="bShowExapandedMenus == true"
         v-model="editorText"
         class="textEditor"
-        min-height="80vh"
+        min-height="100vh"
+        :style="{ opacity: windowOpacity, '-webkit-app-region': 'no-drag' }"
+        @mouseleave="windowMouseEnter(false)"
+        :toolbar="[
+        [
+          {
+            label: $q.lang.editor.align,
+            icon: $q.iconSet.editor.align,
+            fixedLabel: true,
+            options: ['left', 'center', 'right', 'justify']
+          }
+        ],
+        ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+        ['token', 'hr', 'link'],
+        [
+
+          {
+            label: $q.lang.editor.fontSize,
+            icon: $q.iconSet.editor.fontSize,
+            fixedLabel: true,
+            fixedIcon: true,
+            list: 'no-icons',
+            options: [
+              'size-1',
+              'size-2',
+              'size-3',
+              'size-4',
+              'size-5',
+              'size-6',
+              'size-7'
+            ]
+          },
+          
+          {
+            label: $q.lang.editor.defaultFont,
+            icon: $q.iconSet.editor.font,
+            fixedIcon: true,
+            list: 'no-icons',
+            options: [
+              'default_font',
+              'arial',
+              'arial_black',
+              'comic_sans',
+              'courier_new',
+              'impact',
+              'lucida_grande',
+              'times_new_roman',
+              'verdana'
+            ]
+          },
+          
+        ],
+        ['quote', 'unordered', 'ordered', 'outdent', 'indent', 'removeFormat'],
+        ['undo', 'redo'],
+        ['viewsource']
+      ]"
+      :fonts="{
+        arial: 'Arial',
+        arial_black: 'Arial Black',
+        comic_sans: 'Comic Sans MS',
+        courier_new: 'Courier New',
+        impact: 'Impact',
+        lucida_grande: 'Lucida Grande',
+        times_new_roman: 'Times New Roman',
+        verdana: 'Verdana'
+      }"
+      />
+      <q-editor
+        v-else
+        v-model="editorText"
+        :toolbar="[]"
+        class="textEditor"
+        min-height="100vh"
         :style="{ opacity: windowOpacity, '-webkit-app-region': 'no-drag' }"
         @mouseleave="windowMouseEnter(false)"
       />
@@ -48,6 +131,9 @@ import { ipcRenderer } from "electron";
 
 export default {
   name: "PageIndex",
+  updated(){
+    // Redraw the Screen
+  },
   data: function() {
     return {
       editorText: "",
@@ -58,24 +144,34 @@ export default {
       oldTitle: "",
       tags: [],
       autoSave: null,
-      windowOpacity: 0.8,
+      windowOpacity: 0.95,
       lowOpacity: 0.9,
-      highOpacity: 0.9,
+      highOpacity: 0.95,
       sWindowDragSetting: "drag",
       sWindowBorderColor: "orange",
-      sWindowBorderStyle: "none"
+      sWindowBorderStyle: "none",
+      bShowExapandedMenus: true,
+      bShowBordersOnHover: false,
+      sToolBarTitle: "Hide Tool Bar"
     };
   },
-  // watch: {
-  //   editorText: function(oldText, newText) {
-  //     this.newText = newText;
-  //     this.oldText = oldText;
-  //   },
-  //   noteTitle: function(oldTitle, newTitle) {
-  //     this.newTitle = newTitle;
-  //     this.oldTitle = oldTitle;
-  //   }
-  // },
+  watch: {
+    editorText: function(oldText, newText) {
+      this.newText = newText;
+      this.oldText = oldText;
+    },
+    noteTitle: function(oldTitle, newTitle) {
+      this.newTitle = newTitle;
+      this.oldTitle = oldTitle;
+    },
+    bShowExapandedMenus(b,a){
+      if (a == false){
+        this.sToolBarTitle = "Hide Tool Bar"
+      } else {
+        this.sToolBarTitle = "Show Tool Bar"
+      }
+    }
+  },
   methods: {
     saveDataToFile() {
       ipcRenderer.send("saveToDisk", {
@@ -96,7 +192,9 @@ export default {
     windowMouseEnter(bWindowEntered) {
       if (bWindowEntered == true) {
         this.windowOpacity = this.highOpacity;
-        this.sWindowBorderStyle = "dotted";
+        if (bShowBordersOnHover == true){
+          this.sWindowBorderStyle = "dotted";
+        }
       } else {
         this.windowOpacity = this.lowOpacity;
         this.sWindowBorderStyle = "none";
@@ -144,5 +242,12 @@ export default {
 }
 .titleText {
   color: white;
+}
+.toolBarColor {
+  background: rgb(191, 231, 238);
+}
+.appMenuBar {
+  background: rgba(128, 128, 128, 0.8);
+  max-height: 50px;
 }
 </style>

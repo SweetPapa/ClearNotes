@@ -47,8 +47,8 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    width: 500,
-    height: 600,
+    width: 600,
+    height: 800,
     transparent: true,
     alwaysOnTop: true,
     autoHideMenuBar: true,
@@ -64,6 +64,7 @@ function createWindow () {
       // preload: path.resolve(__dirname, 'electron-preload.js')
     }
   })
+  mainWindow.setAlwaysOnTop(true, 'pop-up-menu', 1);
 
   mainWindow.loadURL(process.env.APP_URL)
 
@@ -86,7 +87,13 @@ function createWindow () {
     } else if (sWindowCommand == "min"){
       mainWindow.minimize()
     } else if (sWindowCommand == "max"){
-      mainWindow.maximize()
+
+      if (mainWindow.isMaximized() == true){
+        mainWindow.unmaximize()
+      } else {
+        mainWindow.maximize()
+
+      }
     } else {
       // Do Nothing
     }
