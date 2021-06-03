@@ -1,5 +1,5 @@
 {
-  "title": "What the fudge",
-  "body": "<div style=\"text-align: left;\">What the fudge</div><div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">Heck yeah, heck yeah?</div><div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">Hmm?</div><div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">OK, that seemed better, but still, HMMM</div>",
+  "title": "",
+  "body": "This is a test note... I think all of my notes got deleted?<div><br></div><div><br></div><div>Things to Do:</div><div>- Add more features to the text editor: bullet points, fonts, html editing, etc</div><div>- Get the AutoSave feature working flawlessly</div><div>- Implement user settings features</div><div>- Test on Windows</div><div>- Allow users to change window colors</div><div>- Allow users to export document to pdf, text file, etc</div><div>- Allow for auto saving to Google Drive, or something else</div><div>- Figure out why I can't right click...</div><div>- Add some specific right clicking features maybe?</div>",
   "tags": []
 }

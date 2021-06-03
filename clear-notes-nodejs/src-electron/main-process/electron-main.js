@@ -16,6 +16,31 @@ if (process.env.PROD) {
 }
 
 let mainWindow
+let settingsWindow
+
+function createSettingsWindow(){
+  settingsWindow = new BrowserWindow({
+    width: 500,
+    height: 600,
+    alwaysOnTop: true,
+    useContentSize: true,
+    webPreferences: {
+      // Change from /quasar.conf.js > electron > nodeIntegration;
+      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
+      nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
+      nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+
+      // More info: /quasar-cli/developing-electron-apps/electron-preload-script
+      // preload: path.resolve(__dirname, 'electron-preload.js')
+    }
+  })
+
+  settingsWindow.loadURL(process.env.APP_URL + "#/settings")
+
+  settingsWindow.on("close", (event)=>{
+    settingsWindow = null
+  })
+}
 
 function createWindow () {
   /**
@@ -25,7 +50,9 @@ function createWindow () {
     width: 500,
     height: 600,
     transparent: true,
-    frame: true,
+    alwaysOnTop: true,
+    autoHideMenuBar: true,
+    frame: false,
     useContentSize: true,
     webPreferences: {
       // Change from /quasar.conf.js > electron > nodeIntegration;
@@ -51,6 +78,24 @@ function createWindow () {
   ipcMain.on("loadNotes", (event)=>{
     console.log("Loading Notes")
     appIO.readFromFileSync(mainWindow.webContents)
+  })
+
+  ipcMain.on("windowAction", (event, sWindowCommand)=>{
+    if (sWindowCommand == "close"){
+      mainWindow.minimize()
+    } else if (sWindowCommand == "min"){
+      mainWindow.minimize()
+    } else if (sWindowCommand == "max"){
+      mainWindow.maximize()
+    } else {
+      // Do Nothing
+    }
+  })
+
+  ipcMain.on("openSettingsWindow",(event)=>{
+    if (!settingsWindow){
+      createSettingsWindow()
+    }
   })
 }
 
