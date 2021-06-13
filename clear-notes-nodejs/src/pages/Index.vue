@@ -6,9 +6,8 @@
       opacity: windowOpacity,
       'border-color': sWindowBorderColor,
       'border-style': sWindowBorderStyle,
-      overflow: 'hidden',
     }"
-    class="daPage scrollable-element"
+    class="daPage"
   >
     <div style="overflow: hidden" class="scrollable-element">
       <!-- Menu Bar -- Which is Draggable -->
@@ -172,7 +171,6 @@
           class="textEditor"
           :style="{
             opacity: windowOpacity,
-            '-webkit-app-region': 'no-drag',
             'min-height': iHeight + 'px',
           }"
           @mouseleave="windowMouseEnter(false)"
@@ -352,10 +350,14 @@ export default {
 }
 
 .daPage {
-  // overflow: hidden;
-  // height: 100vh;
+  overflow: hidden;
+  height: 100vh;
 }
 .q-editor {
   scrollbar-width: thin;
+}
+
+.hideOverflow {
+  overflow: hidden;
 }
 </style>

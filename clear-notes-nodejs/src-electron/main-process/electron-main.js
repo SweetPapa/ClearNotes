@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain, ipcRenderer, nativeTheme } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeTheme, Menu, Tray } from 'electron'
+import { electron } from 'process'
 import appIO from "../js/appIO"
 
 try {
@@ -17,13 +18,35 @@ if (process.env.PROD) {
 
 let mainWindow
 let settingsWindow
+let tray = null
+
+// Setup the Tray Icon
+app.whenReady().then(() => {
+
+  if (process.platform == "darwin"){
+    app.dock.hide()
+  } else if (process.platform == "win32"){
+    // Do nothing for now
+  } else {
+    // Do nothing for now
+  }
+  tray = new Tray(`C:\\Code\\ClearNotes\\clear-notes-nodejs\\src\\assets\\notes.png`)
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Item1', type: 'radio' },
+    { label: 'Item2', type: 'radio' },
+    { label: 'Item3', type: 'radio', checked: true },
+    { label: 'Quit Application', type: 'normal', click: ()=>{
+      app.quit()
+    } }
+  ])
+  tray.setToolTip('This is my application.')
+  tray.setContextMenu(contextMenu)
+})
 
 function createSettingsWindow(){
   settingsWindow = new BrowserWindow({
     width: 500,
     height: 600,
-    transparent: true,
-    resizable: true,
     alwaysOnTop: true,
     useContentSize: true,
     webPreferences: {
@@ -51,6 +74,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     width: 600,
     height: 800,
+    maximizable: false,
     transparent: true,
     frame: false,
     useContentSize: true,
@@ -64,6 +88,9 @@ function createWindow () {
       // preload: path.resolve(__dirname, 'electron-preload.js')
     }
   })
+
+  mainWindow.maxState = false;
+
   mainWindow.setAlwaysOnTop(true, 'pop-up-menu', 1);
 
   mainWindow.loadURL(process.env.APP_URL)
@@ -89,12 +116,14 @@ function createWindow () {
     } else if (sWindowCommand == "min"){
       mainWindow.minimize()
     } else if (sWindowCommand == "max"){
-
-      if (mainWindow.isMaximized() == true){
+        console.log(mainWindow.maxState)
+      if (mainWindow.maxState == true){
+        console.log("We Should Unmaximize")
         mainWindow.unmaximize()
+        mainWindow.maxState = false;
       } else {
         mainWindow.maximize()
-
+        mainWindow.maxState = true;
       }
     } else {
       // Do Nothing
@@ -121,4 +150,17 @@ app.on('activate', () => {
     } else {
       app.show()
   }
+})
+
+app.on("before-quit", async ()=>{
+  let waitOneSecond = async () => {
+    return new Promise ((res)=>{
+      setTimeout(()=>{
+        res(true)
+      }, 1000)
+    })
+   };
+   await waitOneSecond().then(()=>{
+     console.log("quitting..")
+   })
 })
