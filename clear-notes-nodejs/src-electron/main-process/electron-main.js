@@ -22,6 +22,7 @@ function createSettingsWindow(){
   settingsWindow = new BrowserWindow({
     width: 500,
     height: 600,
+    transparent: true,
     resizable: true,
     alwaysOnTop: true,
     useContentSize: true,

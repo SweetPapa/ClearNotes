@@ -5,7 +5,7 @@ function saveToFileAsync(jData){
 
     fs.writeFile('test.json', data, (err) => {
         if (err) throw err;
-        console.log('Data written to file');
+        // console.log('Data written to file');
     });
 }
 
