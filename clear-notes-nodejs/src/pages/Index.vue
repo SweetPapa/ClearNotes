@@ -1,53 +1,59 @@
 <template>
   <q-page
+
     @mouseenter="windowMouseEnter(true)"
     @mouseleave="windowMouseEnter(false)"
     :style="{
       opacity: windowOpacity,
       'border-color': sWindowBorderColor,
-      'border-style': sWindowBorderStyle
+      'border-style': sWindowBorderStyle,
+      'overflow': 'hidden'
     }"
+    class="daPage scrollable-element"
   >
-    <div class="" :style="{ '-webkit-app-region': sWindowDragSetting }">
+    <div  style="overflow: hidden;" class="scrollable-element">
       <!-- Menu Bar -- Which is Draggable -->
-      <q-bar class="appMenuBar" dark>
+      <q-bar class="appMenuBar" dark >
         <q-btn dense flat round icon="lens" size="8.5px" color="red" @click="changeWindow('close')" />
         <q-btn dense flat round icon="lens" size="8.5px" color="yellow" @click="changeWindow('min')" />
         <q-btn dense flat round icon="lens" size="8.5px" color="green" @click="changeWindow('max')"/>
-        <div class="col text-center  q-pr-xl titleText">
+        <div class="col text-center  q-pr-xl titleText" :style="{ '-webkit-app-region': sWindowDragSetting }">
           Clear Notes | <b>{{ noteTitle }}</b>
         </div>
-        <q-btn dense flat rount icon="settings" @click="openSettingsPane()"/>
       </q-bar>
 
-      <q-expansion-item
-        switch-toggle-side
-        expand-separator
-        v-model="bShowExapandedMenus"
-        :label="sToolBarTitle"
-        class="toolBarColor"
-      >
+    <div  class="row justify-end content-end q-pr-md settingBar">
+      <q-toggle dark v-model="bShowExapandedMenus" :label="sToolBarTitle" />
+      <q-btn dense flat rount dark icon="settings" @click="openSettingsPane()" label="Settings" class="q-pr-md q-pl-md"/>          
+    </div>
+      
 
       <!-- Title Input Field -->
       <q-input
         filled
         v-model="noteTitle"
+        v-if="bShowExapandedMenus == true"
         label="Document Title"
         bg-color="black"
         label-color="white"
         dark
-        :style="{ '-webkit-app-region': 'no-drag' }"
+        
       />
 
-      </q-expansion-item>
-
       <!-- Text Editor -->
+      <q-scroll-area
+      :thumb-style="thumbStyle"
+      :bar-style="barStyle"
+      :style="{height: iHeight + 'px'}"
+      >
       <q-editor
+      
         v-if="bShowExapandedMenus == true"
         v-model="editorText"
-        class="textEditor"
-        min-height="100vh"
-        :style="{ opacity: windowOpacity, '-webkit-app-region': 'no-drag' }"
+        class="textEditor scrollable-element"
+        min-height="20vh"
+        max-height="100vh"
+        :style="{ opacity: windowOpacity, '-webkit-app-region': 'no-drag', height: iHeight + 'px', overflow: 'hidden' }"
         @mouseleave="windowMouseEnter(false)"
         :toolbar="[
         [
@@ -117,17 +123,22 @@
         v-else
         v-model="editorText"
         :toolbar="[]"
-        class="textEditor"
-        min-height="100vh"
-        :style="{ opacity: windowOpacity, '-webkit-app-region': 'no-drag' }"
+        class="textEditor scrollable-element"
+        min-height="20vh"
+        max-height="100vh"
+        :content-style="{ 'scrollbar-width': 'thin' }"
+        :style="{ opacity: windowOpacity, '-webkit-app-region': 'no-drag', height: iHeight + 'px', overflow: 'hidden',  }"
         @mouseleave="windowMouseEnter(false)"
       />
+      </q-scroll-area>
     </div>
   </q-page>
 </template>
 
 <script>
 import { ipcRenderer } from "electron";
+const electron = require('electron')
+const remote = electron.remote
 
 export default {
   name: "PageIndex",
@@ -147,12 +158,28 @@ export default {
       windowOpacity: 0.95,
       lowOpacity: 0.9,
       highOpacity: 0.95,
+      iHeight: 100,
       sWindowDragSetting: "drag",
       sWindowBorderColor: "orange",
       sWindowBorderStyle: "none",
-      bShowExapandedMenus: true,
+      bShowExapandedMenus: false,
       bShowBordersOnHover: false,
-      sToolBarTitle: "Hide Tool Bar"
+      sToolBarTitle: "Compact",
+      thumbStyle: {
+        right: '4px',
+        borderRadius: '5px',
+        backgroundColor: '#027be3',
+        width: '5px',
+        opacity: 0.75
+      },
+
+      barStyle: {
+        right: '2px',
+        borderRadius: '9px',
+        backgroundColor: '#027be3',
+        width: '9px',
+        opacity: 0.2
+      }
     };
   },
   watch: {
@@ -166,9 +193,9 @@ export default {
     },
     bShowExapandedMenus(b,a){
       if (a == false){
-        this.sToolBarTitle = "Hide Tool Bar"
+        this.sToolBarTitle = "Compact"
       } else {
-        this.sToolBarTitle = "Show Tool Bar"
+        this.sToolBarTitle = "Compact"
       }
     }
   },
@@ -192,7 +219,7 @@ export default {
     windowMouseEnter(bWindowEntered) {
       if (bWindowEntered == true) {
         this.windowOpacity = this.highOpacity;
-        if (bShowBordersOnHover == true){
+        if (this.bShowBordersOnHover == true){
           this.sWindowBorderStyle = "dotted";
         }
       } else {
@@ -212,6 +239,18 @@ export default {
     this.saveDataToFile();
   },
   beforeMount() {
+    window.addEventListener("resize", ()=>{
+    let windowData = remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds()
+      if (windowData){
+        this.iHeight = windowData.height - 75
+      }
+    });
+
+        let windowData = remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds()
+      if (windowData){
+        this.iHeight = windowData.height - 75
+      }
+
     this.autoSave = setInterval(() => {
       this.saveDataToFile();
     }, 5000);
@@ -237,6 +276,12 @@ export default {
   background: black;
 }
 
+.settingBar{
+  background: rgba(209, 209, 209, 0.659);
+  max-height: 50px;
+
+}
+
 .NOdraggable {
   -webkit-app-region: no-drag;
 }
@@ -249,5 +294,13 @@ export default {
 .appMenuBar {
   background: rgba(128, 128, 128, 0.8);
   max-height: 50px;
+}
+
+ .daPage {
+  // overflow: hidden;
+  // height: 100vh;
+}
+.q-editor {
+  scrollbar-width: thin;
 }
 </style>

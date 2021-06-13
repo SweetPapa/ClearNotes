@@ -22,6 +22,7 @@ function createSettingsWindow(){
   settingsWindow = new BrowserWindow({
     width: 500,
     height: 600,
+    resizable: true,
     alwaysOnTop: true,
     useContentSize: true,
     webPreferences: {
@@ -50,8 +51,6 @@ function createWindow () {
     width: 600,
     height: 800,
     transparent: true,
-    alwaysOnTop: true,
-    autoHideMenuBar: true,
     frame: false,
     useContentSize: true,
     webPreferences: {
@@ -71,6 +70,8 @@ function createWindow () {
   mainWindow.on("close", (event)=>{
     mainWindow = null
   })
+
+  mainWindow.setIgnoreMouseEvents(false)
 
   ipcMain.on("saveToDisk", (event, jData)=>{
     appIO.saveToFileAsync(jData)
@@ -109,7 +110,7 @@ function createWindow () {
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
-      app.hide()
+      app.quit()
 })
 
 app.on('activate', () => {
